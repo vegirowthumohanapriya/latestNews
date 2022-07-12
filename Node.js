@@ -33,9 +33,6 @@ async  function  timedata() {
           //console.log(pointer);
           newstory += htmlData[pointer];
           pointer++;
-          if (pointer > position + 300) {
-            break;
-          }
           if (htmlData[pointer] === "<" && htmlData[pointer + 1] === "/") {
             break;
           }
@@ -44,9 +41,6 @@ async  function  timedata() {
           newlink += htmlData[newlinkpointer];
 
           newlinkpointer += 1;
-          if (newlinkpointer > linkposition + 200) {
-            break;
-          }
           if (
             htmlData[newlinkpointer] === `/` &&
             htmlData[newlinkpointer + 1] === '"'
