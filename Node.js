@@ -1,6 +1,6 @@
 const https = require("https");
 const http = require("http");
-function timedata() {
+async  function  timedata() {
   return new Promise((resolve,reject) => {
     var timesData = "";
     https.get("https://time.com", (res) => {
@@ -8,27 +8,59 @@ function timedata() {
          timesData += data1;
         });
         res.on("end", () => {
-          const htmlData = timesData.split(
-            `<h2 class="latest-stories__heading">Latest Stories</h2>`
-          ); 
-          const content = htmlData[1].toString().split("</ul>");
-          const contentData = content[0] 
-          const removedData = contentData.toString().split(`<h3 class="latest-stories__item-headline">`);
-          const dataH3 = removedData.toString().split(`</h3>`);
-          const removedAnchor = contentData.toString().split(`/">`);
-          const Array = [];
-          for (var i = 0; i < dataH3.length -1; i++) {
-            const object = {};
-            const oneNews = dataH3[i].toString().split(`/">`);
-            const link = removedAnchor[i].toString().split(`<a href="/`);
-            const timesLink = "https://time.com/" 
-            const oneLink = timesLink + link[1];
-            const timeNews = oneNews[1].toString().trim();
-            object.Title = timeNews.slice(1);
-            object.Link = oneLink;
-            Array.push(object);
+          let htmlData = timesData;
+          let divposition = htmlData.indexOf(`partial latest-stories`);
+          let position =
+            htmlData.indexOf(`latest-stories__item-headline`, divposition) - 2;
+          let linkposition = htmlData.indexOf(`<a href=`, divposition) - 2;
+      
+      let allnewsarray = []
+      for (let i = 0; i <=5; i++) {
+        let newsobject = {}
+        position = htmlData.indexOf(
+          `latest-stories__item-headline`,
+          position + 1
+        );
+
+        linkposition = htmlData.indexOf(`<a href=`, linkposition + 1);
+        //console.log(position);
+        let pointer = position + 31;
+        let newlinkpointer = linkposition + 9;
+        let newstory = "";
+        let newlink = "https://time.com";
+
+        while (true) {
+          //console.log(pointer);
+          newstory += htmlData[pointer];
+          pointer++;
+          if (pointer > position + 300) {
+            break;
           }
-        resolve(Array)
+          if (htmlData[pointer] === "<" && htmlData[pointer + 1] === "/") {
+            break;
+          }
+        }
+        while (true) {
+          newlink += htmlData[newlinkpointer];
+
+          newlinkpointer += 1;
+          if (newlinkpointer > linkposition + 200) {
+            break;
+          }
+          if (
+            htmlData[newlinkpointer] === `/` &&
+            htmlData[newlinkpointer + 1] === '"'
+          ) {
+            break;
+          }
+        }
+        console.log(newstory);
+        newsobject.title = newstory
+        newsobject.link = newlink
+        console.log(newlink);
+        allnewsarray.push(newsobject)
+      }
+       resolve(allnewsarray)
         });
       })
       .on("error", (e) => {
@@ -39,20 +71,25 @@ function timedata() {
 }
 http.createServer(async function (req, res) {
       if (req.url === "/getTimeStories") {
-      timedata().then((News)=>{
+        (async function(){
+      try{
+        let News = await timedata()
         console.log(News)
         res.writeHead(200, { "Content-Type": "application/json" });
         res.write(JSON.stringify(News));
         res.end()
-      }).catch((e)=>{
-        console.log(e)
-      }).finally(()=>{
-        console.log("data send successfully")
-      })
-    }
+        }
+      catch(e){
+        res.writeHead(500, { "Content-Type": "text/html" });
+        res.write(`<h1>Internal error</h1>`);
+        res.end()
+      }
+        
+    })()
+  }
     else{
       res.writeHead(200, { "Content-Type": "text/html" });
-      res.write(`<h1>Please type http://localhost:3000/getTimeStories</h1>`)
+      res.write(`<h3>Please type http://localhost:3000/getTimeStories</h3>`)
       res.end()
     } 
   })
