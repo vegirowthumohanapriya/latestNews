@@ -15,7 +15,7 @@ async  function  timedata() {
           let linkposition = htmlData.indexOf(`<a href=`, divposition) - 2;
       
       let allnewsarray = []
-      for (let i = 0; i <=6; i++) {
+      for (let i = 0; i <=5; i++) {
         let newsobject = {}
         position = htmlData.indexOf(
           `latest-stories__item-headline`,
