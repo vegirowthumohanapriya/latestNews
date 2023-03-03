@@ -30,7 +30,7 @@ async  function  timedata() {
         let newlink = "https://time.com";
 
         while (true) {
-          //console.log(pointer);
+          console.log(pointer);
           newstory += htmlData[pointer];
           pointer++;
           if (htmlData[pointer] === "<" && htmlData[pointer + 1] === "/") {
